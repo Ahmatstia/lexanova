@@ -7,9 +7,16 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
-# LangChain text processing
-from langchain.schema import Document
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+# LangChain text processing (langchain v0.2+ API)
+try:
+    from langchain_core.documents import Document
+except ImportError:
+    from langchain.schema import Document  # fallback untuk versi lama
+
+try:
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
+except ImportError:
+    from langchain.text_splitter import RecursiveCharacterTextSplitter  # fallback
 
 # PDF reader
 try:

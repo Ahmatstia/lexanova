@@ -8,7 +8,10 @@ import gc
 from pathlib import Path
 from typing import List, Optional, Tuple
 
-from langchain.schema import Document
+try:
+    from langchain_core.documents import Document
+except ImportError:
+    from langchain.schema import Document  # fallback untuk versi lama
 
 # ChromaDB via LangChain
 try:

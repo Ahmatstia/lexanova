@@ -1,6 +1,6 @@
 """Lexa Assistant - Workspace Monitor Module"""
-from app.modules.monitor.vision_handler import VisionHandler, vision_handler, DetectionResult
-from app.modules.monitor.ann_model import ANNModelManager, ann_model_manager, InferenceResult
+# Import di-lazy agar tidak memblock startup server
+# torch dan cv2 dimuat hanya saat dibutuhkan
 
 __all__ = [
     "VisionHandler",
