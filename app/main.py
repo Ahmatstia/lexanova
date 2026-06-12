@@ -10,7 +10,8 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException, Query, BackgroundTasks
+import shutil
+from fastapi import FastAPI, HTTPException, Query, BackgroundTasks, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -97,7 +98,7 @@ app = FastAPI(
 # CORS (untuk frontend lokal)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:8080"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -311,6 +312,50 @@ def ingest_documents(background_tasks: BackgroundTasks):
         success=True,
         message="Proses ingest dokumen dimulai di background. Cek log untuk status.",
     )
+
+
+@app.post("/api/study/upload", tags=["Study Buddy"])
+def upload_document(background_tasks: BackgroundTasks, file: UploadFile = File(...)):
+    """
+    Mengunggah dokumen PDF/TXT/MD ke folder data/documents/ 
+    dan otomatis memicu re-ingest di background.
+    """
+    allowed_extensions = {".pdf", ".txt", ".md"}
+    file_ext = Path(file.filename).suffix.lower()
+    
+    if file_ext not in allowed_extensions:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Ekstensi file tidak didukung. Harap upload: {', '.join(allowed_extensions)}"
+        )
+    
+    # Simpan file ke direktori dokumen
+    file_path = settings.DOCUMENTS_DIR / file.filename
+    try:
+        settings.DOCUMENTS_DIR.mkdir(parents=True, exist_ok=True)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        logger.info(f"File berhasil diunggah: {file_path}")
+    except Exception as e:
+        logger.error(f"Gagal menyimpan file {file.filename}: {e}")
+        raise HTTPException(status_code=500, detail=f"Gagal menyimpan file: {e}")
+    
+    # Jalankan ingest di background sama seperti endpoint /api/study/ingest
+    def _run_ingest():
+        from app.modules.study_buddy.document_loader import load_and_split_documents
+        from app.modules.study_buddy.vector_store import ingest_documents as vs_ingest
+        logger.info(f"Memulai ingest otomatis setelah upload file {file.filename}...")
+        chunks = load_and_split_documents()
+        if chunks:
+            vs_ingest(chunks)
+            
+    background_tasks.add_task(_run_ingest)
+    
+    return {
+        "success": True,
+        "message": f"File '{file.filename}' berhasil diunggah dan sedang di-indeks.",
+        "filename": file.filename
+    }
 
 
 @app.get("/api/study/status", tags=["Study Buddy"])
