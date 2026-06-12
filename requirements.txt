@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+python-dotenv
+requests
+langchain
+langchain-community
+chromadb
+pypdf
+opencv-python
+torch
+torchvision
+numpy
