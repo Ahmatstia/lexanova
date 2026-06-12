@@ -1,12 +1,39 @@
-fastapi
-uvicorn
-python-dotenv
-requests
-langchain
-langchain-community
-chromadb
-pypdf
-opencv-python
-torch
-torchvision
-numpy
+# =============================================
+# Lexa Assistant - Python Dependencies
+# =============================================
+
+# --- Web Framework ---
+fastapi>=0.111.0
+uvicorn[standard]>=0.30.0
+python-multipart>=0.0.9
+
+# --- HTTP & Config ---
+requests>=2.31.0
+python-dotenv>=1.0.0
+
+# --- Pydantic (data validation) ---
+pydantic>=2.7.0
+
+# --- LangChain Core & Community ---
+langchain>=0.2.0
+langchain-community>=0.2.0
+
+# --- Vector Database ---
+chromadb>=0.5.0
+
+# --- PDF & Document Loaders ---
+pypdf>=4.0.0
+
+# --- Embeddings (offline, CPU/GPU) ---
+sentence-transformers>=3.0.0
+
+# --- Computer Vision & DIP ---
+opencv-python>=4.9.0.80
+numpy>=1.26.0
+
+# --- Deep Learning (ANN) ---
+torch>=2.3.0
+torchvision>=0.18.0
+
+# --- Utilities ---
+urllib3>=2.2.0
